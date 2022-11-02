@@ -1,0 +1,20 @@
+package metric
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestMetricResultFormatterSuccess(t *testing.T) {
+	// Setup
+	mockResult = map[string]int{
+		"lobby_screen": 161,
+		"level1":       126,
+	}
+	metricResult := MetricResultFormatter(mockResult)
+
+	// Assertions
+	assert.Equal(t, 2, len(metricResult))
+	assert.Equal(t, "lobby_screen", metricResult[0].LevelName)
+}
