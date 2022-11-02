@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -12,9 +13,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// MetricFile struct which contains
+// Metric struct which contains
 // data metric of a game level
-type MetricFile struct {
+type Metric struct {
 	LevelName string    `json:"level_name"`
 	Value     int       `json:"value"`
 	Timestamp time.Time `json:"timestamp"`
@@ -42,71 +43,119 @@ func MetricResultFormatter(result map[string]int) []MetricResult {
 	return metricResults
 }
 
-func main() {
-	// Open our file
-	// file, err := os.Open("data/01-jan.json")
-	file, err := os.Open("data/01-jan.csv")
+// OpenMetricFile return a metric file
+func OpenMetricFile(filename string) (*os.File, error) {
+	// Open a metric file
+	file, err := os.Open(filename)
+
 	// if os.Open returns an error then handle it
 	if err != nil {
-		log.Fatal(err)
+		return file, err
 	}
-	// fmt.Println("Successfully opened 01-jan.json")
-	fmt.Println("Successfully opened 01-jan.csv")
-	// defer the closing of our file so that we can parse it later on
-	defer file.Close()
 
-	// read our opened file as a byte array
-	// byteValue, _ := ioutil.ReadAll(jsonFile)
-	// read our opened file as a string matrix (array or stringarray)
+	fmt.Println("Successfully opened", filename)
+
+	return file, nil
+}
+
+func GetMetricsDataFromCSVFile(file *os.File) []Metric {
+	// initialize our metrics array
+	var metrics []Metric
+
+	// read our opened file as a string matrix (array or array)
 	csvReader := csv.NewReader(file)
 	csvLines, _ := csvReader.ReadAll()
 
-	// for _, line := range csvLines[1:] {
-	// 	fmt.Printf(
-	// 		"Level: %s - %s (%T) (%s)\n",
-	// 		line[1],
-	// 		line[2], line[2],
-	// 		line[0],
-	// 	)
-	// }
-
-	// initialize our MetricFiles array
-	var metricFiles []MetricFile
-
-	// unmarshal (decode) our byteArray which contains our
-	// json file content into 'metricFiles' which we defined above
-	// json.Unmarshal(byteValue, &metricFiles)
-
 	// map our csvLines which contains our
-	// csv file content into 'metricFiles' which we defined above
+	// csv file content into 'metrics' which we defined above
 	for _, line := range csvLines[1:] {
 		matricValue, _ := strconv.Atoi(line[2])
 		matricTimestamp, _ := time.Parse(time.RFC3339, line[0])
-		metricFile := MetricFile{
+		metric := Metric{
 			LevelName: line[1],
 			Value:     matricValue,
 			Timestamp: matricTimestamp,
 		}
-		metricFiles = append(metricFiles, metricFile)
+		metrics = append(metrics, metric)
 	}
 
-	// iterate through every metric file and
-	// summarize those value for each level name at the data
-	result := map[string]int{}
-	for i := 0; i < len(metricFiles); i++ {
-		result[metricFiles[i].LevelName] += metricFiles[i].Value
-	}
+	return metrics
+}
 
+func GetMetricsDataFromJSONFile(file *os.File) []Metric {
+	// initialize our metrics array
+	var metrics []Metric
+
+	// read our opened file as a byte array
+	byteValue, _ := io.ReadAll(file)
+
+	// unmarshal (decode) our byteArray which contains our
+	// json file content into 'metrics' which we defined above
+	json.Unmarshal(byteValue, &metrics)
+
+	return metrics
+}
+
+func WriteMetricResultToYAMLFile(result []MetricResult) error {
 	// marshal (encode) the result with formatter function
-	// fileContent, err := json.Marshal(MetricResultFormatter(result))
-	fileContent, err := yaml.Marshal(MetricResultFormatter(result))
+	fileContent, err := yaml.Marshal(result)
+	if err != nil {
+		return err
+	}
+
+	// white the file content which contains our result into a yaml file
+	if err := os.WriteFile("output/output.yaml", fileContent, 0644); err != nil {
+		return err
+	}
+
+	fmt.Println("Successfully generate output.yaml")
+
+	return nil
+}
+
+func WriteMetricResultToJSONFile(result []MetricResult) error {
+	// marshal (encode) the result with formatter function
+	fileContent, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+
+	// white the file content which contains our result into a json file
+	if err := os.WriteFile("output/output.json", fileContent, 0644); err != nil {
+		return err
+	}
+
+	fmt.Println("Successfully generate output.json")
+
+	return nil
+}
+
+func main() {
+	// Open a metric file
+	// filename := "data/csv/01-jan.csv"
+	filename := "data/json/01-jan.json"
+	file, err := OpenMetricFile(filename)
+	// if os.Open returns an error then handle it
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// defer the closing of our file so that we can parse it later on
+	defer file.Close()
+
+	// metrics := GetMetricsDataFromCSVFile(file)
+	metrics := GetMetricsDataFromJSONFile(file)
+
+	// iterate through every metric file and
+	// summarize those value for each level name at the data
+	result := map[string]int{}
+	for i := 0; i < len(metrics); i++ {
+		result[metrics[i].LevelName] += metrics[i].Value
+	}
+
 	// white the file content which contains our result into a json file
-	if err := ioutil.WriteFile("output.yaml", fileContent, 0644); err != nil {
+	matricResult := MetricResultFormatter(result)
+	if err := WriteMetricResultToYAMLFile(matricResult); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Successfully generate output.yaml")
 }
