@@ -3,11 +3,11 @@ AccetByte Inc technical project-based test
 
 ### Running the app
 
-Running executable (.exe) file
+Run executable (.exe) file using following command
 ```powershell
 .\sumetife.exe -d inputDirPath -t inputFileType --startTime inputStartTime --endTime inputEndTime
 ```
-Note: inputDirPath, inputFileType, inputStartTime, inputEndTime are required value
+<small>Note: inputDirPath, inputFileType, inputStartTime, inputEndTime are required value</small>
 
 #### Command line flag
 | Flag | Description | Type |
