@@ -60,7 +60,7 @@ func (h metricHandler) WriteMetricResultToFile(fileName string, result map[strin
 		return err
 	}
 
-	fmt.Println("Successfully generate " + fileName)
+	fmt.Println("Successfully generated " + fileName)
 
 	return nil
 }
