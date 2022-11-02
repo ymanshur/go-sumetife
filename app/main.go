@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 )
 
 // Users struct which contains
@@ -45,19 +44,25 @@ func main() {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var users Users
+	// var users Users
+	// state the result using interfaces{} to take less time for instance mapping instead using struct
+	var result map[string]interface{}
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &users)
+	// json.Unmarshal(byteValue, &users)
+	// we unmarshal jsonFile's into 'result', as well as handle unstructured data
+	json.Unmarshal(byteValue, &result)
 
 	// we iterate through every user within our users array and
 	// print out the user Type, their name, and their facebook url
 	// as just an example
-	for i := 0; i < len(users.Users); i++ {
-		fmt.Println("User Type: " + users.Users[i].Type)
-		fmt.Println("User Age: " + strconv.Itoa(users.Users[i].Age))
-		fmt.Println("User Name: " + users.Users[i].Name)
-		fmt.Println("Facebook Url: " + users.Users[i].Social.Facebook)
-	}
+	// for i := 0; i < len(users.Users); i++ {
+	// 	fmt.Println("User Type: " + users.Users[i].Type)
+	// 	fmt.Println("User Age: " + strconv.Itoa(users.Users[i].Age))
+	// 	fmt.Println("User Name: " + users.Users[i].Name)
+	// 	fmt.Println("Facebook Url: " + users.Users[i].Social.Facebook)
+	// }
+
+	fmt.Println(result["users"])
 }
