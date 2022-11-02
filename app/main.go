@@ -59,9 +59,18 @@ func OpenMetricFile(filename string) (*os.File, error) {
 	return file, nil
 }
 
-func GetMetricsDataFromCSVFile(file *os.File) []Metric {
+func GetMetricsDataFromCSVFile(filename string) ([]Metric, error) {
 	// initialize our metrics array
 	var metrics []Metric
+
+	file, err := OpenMetricFile(filename)
+	// if os.Open returns an error then handle it
+	if err != nil {
+		return metrics, err
+	}
+
+	// defer the closing of our file so that we can parse it later on
+	defer file.Close()
 
 	// read our opened file as a string matrix (array or array)
 	csvReader := csv.NewReader(file)
@@ -80,12 +89,21 @@ func GetMetricsDataFromCSVFile(file *os.File) []Metric {
 		metrics = append(metrics, metric)
 	}
 
-	return metrics
+	return metrics, nil
 }
 
-func GetMetricsDataFromJSONFile(file *os.File) []Metric {
+func GetMetricsDataFromJSONFile(filename string) ([]Metric, error) {
 	// initialize our metrics array
 	var metrics []Metric
+
+	file, err := OpenMetricFile(filename)
+	// if os.Open returns an error then handle it
+	if err != nil {
+		return metrics, err
+	}
+
+	// defer the closing of our file so that we can parse it later on
+	defer file.Close()
 
 	// read our opened file as a byte array
 	byteValue, _ := io.ReadAll(file)
@@ -94,7 +112,7 @@ func GetMetricsDataFromJSONFile(file *os.File) []Metric {
 	// json file content into 'metrics' which we defined above
 	json.Unmarshal(byteValue, &metrics)
 
-	return metrics
+	return metrics, nil
 }
 
 func WriteMetricResultToYAMLFile(result []MetricResult) error {
@@ -132,7 +150,10 @@ func WriteMetricResultToJSONFile(result []MetricResult) error {
 }
 
 func main() {
-	dirPath := "data/csv"
+	fileType := "csv"
+	dirPath := "data"
+
+	// read the data directory
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		log.Fatal(err)
@@ -141,21 +162,18 @@ func main() {
 	result := map[string]int{}
 	// iterate through every metric file and summarize those value of each level name
 	for _, file := range files {
-		// fmt.Println(filepath.Join(dirPath, file.Name()), file.IsDir())
+		fileExt := filepath.Ext(file.Name())
+		if fileExt != ("." + fileType) {
+			continue
+		}
 
-		// Open a metric file
 		filename := filepath.Join(dirPath, file.Name())
-		file, err := OpenMetricFile(filename)
-		// if os.Open returns an error then handle it
+
+		metrics, err := GetMetricsDataFromCSVFile(filename)
+		// metrics, err := GetMetricsDataFromJSONFile(filename)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// defer the closing of our file so that we can parse it later on
-		defer file.Close()
-
-		metrics := GetMetricsDataFromCSVFile(file)
-		// metrics := GetMetricsDataFromJSONFile(file)
 
 		// iterate through every metric data and
 		// add those value into 'result' map
@@ -164,9 +182,9 @@ func main() {
 		}
 	}
 
-	// white the file content which contains our result into a json file
-	matricResult := MetricResultFormatter(result)
-	if err := WriteMetricResultToYAMLFile(matricResult); err != nil {
+	metricResult := MetricResultFormatter(result)
+	// write the file content which contains our result into a json file
+	if err := WriteMetricResultToJSONFile(metricResult); err != nil {
 		log.Fatal(err)
 	}
 }
