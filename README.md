@@ -1,9 +1,19 @@
 # Sumetife App
 AccetByte Inc technical project-based test
 
-### Running the app
+### Build the app
+Build the app using `make`, will return a (executable) file which name is sumetife.exe
+```powershell
+make build
+```
 
-Run executable (.exe) file using following command
+### Running the app
+Run `main.go` using `make`
+```powershell
+make run
+```
+
+If you already build the app, just run executable (.exe) file using following command
 ```powershell
 .\sumetife.exe -d inputDirPath -t inputFileType --startTime inputStartTime --endTime inputEndTime
 ```
