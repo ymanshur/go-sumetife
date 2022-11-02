@@ -59,7 +59,21 @@ func OpenMetricFile(filename string) (*os.File, error) {
 	return file, nil
 }
 
-func GetMetricsDataFromCSVFile(filename string) ([]Metric, error) {
+type FileAdapter interface {
+	GetMetricsData(filename string) ([]Metric, error)
+}
+
+func NewFileAdapter(fileType string) FileAdapter {
+	if fileType == "csv" {
+		return CSVFileAdapter{}
+	}
+	return JSONFileAdapter{}
+}
+
+type CSVFileAdapter struct {
+}
+
+func (a CSVFileAdapter) GetMetricsData(filename string) ([]Metric, error) {
 	// initialize our metrics array
 	var metrics []Metric
 
@@ -92,7 +106,10 @@ func GetMetricsDataFromCSVFile(filename string) ([]Metric, error) {
 	return metrics, nil
 }
 
-func GetMetricsDataFromJSONFile(filename string) ([]Metric, error) {
+type JSONFileAdapter struct {
+}
+
+func (a JSONFileAdapter) GetMetricsData(filename string) ([]Metric, error) {
 	// initialize our metrics array
 	var metrics []Metric
 
@@ -159,6 +176,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fileAdapter := NewFileAdapter(fileType)
+
 	result := map[string]int{}
 	// iterate through every metric file and summarize those value of each level name
 	for _, file := range files {
@@ -168,9 +187,7 @@ func main() {
 		}
 
 		filename := filepath.Join(dirPath, file.Name())
-
-		metrics, err := GetMetricsDataFromCSVFile(filename)
-		// metrics, err := GetMetricsDataFromJSONFile(filename)
+		metrics, err := fileAdapter.GetMetricsData(filename)
 		if err != nil {
 			log.Fatal(err)
 		}
