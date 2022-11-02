@@ -10,11 +10,13 @@ import (
 	"path/filepath"
 	"strconv"
 	"sumetife/metric"
+	"sumetife/util"
 	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
+// JSONFileDecoder updates defined metrics data from a json file
 func JSONFileDecoder(file *os.File, metrics *[]metric.Metric) error {
 	// read our opened file as a byte array
 	byteValue, err := io.ReadAll(file)
@@ -29,6 +31,7 @@ func JSONFileDecoder(file *os.File, metrics *[]metric.Metric) error {
 	return nil
 }
 
+// CSVFileDecoder updates defined metrics data from a csv file
 func CSVFileDecoder(file *os.File, metrics *[]metric.Metric) error {
 	// read our opened file as a string matrix (array or array)
 	csvReader := csv.NewReader(file)
@@ -141,21 +144,26 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// define file decoder
 	fileDecoder := JSONFileDecoder
 	if inputFileType == "csv" {
 		fileDecoder = CSVFileDecoder
 	}
 
+	// define encoder
 	encoder := json.Marshal
 	if outputFileType == "yaml" {
 		encoder = yaml.Marshal
 	}
 
+	// initialize file handler
 	fileHandler := metric.NewMetricHandler(fileDecoder, encoder)
 
+	// define final result
 	result := map[string]int{}
 	// iterate through every metric file and summarize those value of each level name
 	for _, file := range files {
+		// validate related file type
 		fileExt := filepath.Ext(file.Name())
 		if fileExt != ("." + inputFileType) {
 			continue
@@ -167,21 +175,20 @@ func main() {
 			log.Fatal(err)
 		}
 
-		startTime, err := time.Parse(time.RFC3339, inputStartTime)
+		startTime, err := util.ParseToTimeUTC(inputStartTime)
 		if err != nil {
 			log.Fatal(err)
 		}
-		endTime, err := time.Parse(time.RFC3339, inputEndTime)
+		endTime, err := util.ParseToTimeUTC(inputEndTime)
 		if err != nil {
 			log.Fatal(err)
 		}
-		startTimeInUTC := startTime.UTC()
-		endTimeInUTC := endTime.UTC()
 
 		// iterate through every metric data and
 		// add those value into 'result' map
 		for _, metric := range metrics {
-			if metric.Timestamp.Before(startTimeInUTC) || metric.Timestamp.Equal(endTimeInUTC) || metric.Timestamp.After(endTimeInUTC) {
+			// restrict metric data which timestamp is not in the range time
+			if metric.Timestamp.Before(startTime) || metric.Timestamp.Equal(endTime) || metric.Timestamp.After(endTime) {
 				continue
 			}
 			result[metric.LevelName] += metric.Value
