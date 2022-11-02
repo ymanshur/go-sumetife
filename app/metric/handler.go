@@ -1,7 +1,7 @@
 package metric
 
 import (
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -34,7 +34,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 	if err != nil {
 		return metrics, err
 	}
-	fmt.Println("Successfully opened", fileName)
+	log.Println("Successfully opened", fileName)
 
 	// defer the closing of our file so that we can parse it later on
 	defer file.Close()
@@ -60,7 +60,7 @@ func (h metricHandler) WriteMetricResultToFile(fileName string, result map[strin
 		return err
 	}
 
-	fmt.Println("Successfully generated " + fileName)
+	log.Println("Successfully generated " + fileName)
 
 	return nil
 }
