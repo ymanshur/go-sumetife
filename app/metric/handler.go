@@ -74,9 +74,9 @@ func (h metricHandler) WriteMetricResultToFile(fileName string, result map[strin
 	return nil
 }
 
-func NewMetricHandler(decoder MetricFileDecoder, encoder MetricEncoder) MetricHandler {
+func NewMetricHandler(fileDecoder MetricFileDecoder, encoder MetricEncoder) MetricHandler {
 	return &metricHandler{
-		fileDecoder: decoder,
+		fileDecoder: fileDecoder,
 		encoder:     encoder,
 	}
 }
