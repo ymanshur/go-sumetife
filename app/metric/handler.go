@@ -48,7 +48,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 }
 
 func (h metricHandler) WriteMetricResultToFile(fileName string, result map[string]int) error {
-	metricResult := FormatMetricResult(result)
+	metricResult := MetricResultFormatter(result)
 
 	// print result to the console
 	for _, v := range metricResult {
