@@ -7,6 +7,7 @@ import (
 )
 
 var OpenFile = os.Open
+var WriteFile = os.WriteFile
 
 // MetricFileDecoder update the defined metrics
 // by each metric value in the file
@@ -64,7 +65,7 @@ func (h metricHandler) WriteMetricResultToFile(fileName string, result map[strin
 	}
 
 	// white the file content which contains our result into a file
-	if err := os.WriteFile(fileName, fileContent, 0644); err != nil {
+	if err := WriteFile(fileName, fileContent, 0644); err != nil {
 		return err
 	}
 
