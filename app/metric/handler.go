@@ -1,6 +1,7 @@
 package metric
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -34,7 +35,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 	if err != nil {
 		return metrics, err
 	}
-	log.Println("Successfully opened", fileName)
+	// log.Println("Successfully opened", fileName)
 
 	// defer the closing of our file so that we can parse it later on
 	defer file.Close()
@@ -48,6 +49,11 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 
 func (h metricHandler) WriteMetricResultToFile(fileName string, result map[string]int) error {
 	metricResult := FormatMetricResult(result)
+
+	// print result to the console
+	for _, v := range metricResult {
+		fmt.Printf("Level name: %s, total value: %d\n", v.LevelName, v.TotalValue)
+	}
 
 	// marshal (encode) the result with formatter function
 	fileContent, err := h.encoder(metricResult)
