@@ -28,3 +28,14 @@ If you already build the app, just run executable (.exe) file using following co
 | `--endTime` | The ending time to scan the data in the format of rfc3339, exclusive | Required |
 | `--outputFileType` | The output type of the summary, supported value: json and yaml | Optional |
 | `--outputFileName` | The output filename of summary | Optional |
+
+### Testing the app
+Complete (include function mode) run test
+```powershell
+make test
+```
+
+Add `mode=html` argument for html display
+```powershell
+make test mode=html
+```
