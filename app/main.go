@@ -31,25 +31,29 @@ func main() {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our MetricFiles array
-	var metricFiles []MetricFile
+	// var metricFiles []MetricFile
 	// state the result using interfaces{} to take less time for instance mapping instead using struct
-	// var result map[string]interface{}
+	var result []map[string]interface{}
 
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'metricFiles' which we defined above
-	json.Unmarshal(byteValue, &metricFiles)
+	// json.Unmarshal(byteValue, &metricFiles)
 	// we unmarshal jsonFile's into 'result', as well as handle unstructured data
-	// json.Unmarshal(byteValue, &result)
+	json.Unmarshal(byteValue, &result)
 
 	// we iterate through every metric file within our metricFiles array and
 	// print out the metric value, their level name, and their timestamp
 	// as just an example
-	for i := 0; i < len(metricFiles); i++ {
+	// for i := 0; i < len(metricFiles); i++ {
+	// 	fmt.Printf(
+	// 		"Level: %s - %d (%s)\n",
+	// 		metricFiles[i].LevelName, metricFiles[i].Value, metricFiles[i].Timestamp,
+	// 	)
+	// }
+	for i := 0; i < len(result); i++ {
 		fmt.Printf(
-			"Level: %s - %d (%s)\n",
-			metricFiles[i].LevelName, metricFiles[i].Value, metricFiles[i].Timestamp,
+			"Level: %s - %f (%s)\n",
+			result[i]["level_name"], result[i]["value"], result[i]["timestamp"],
 		)
 	}
-
-	// fmt.Println(result["users"])
 }
