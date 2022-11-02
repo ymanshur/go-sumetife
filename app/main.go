@@ -65,6 +65,8 @@ func main() {
 	outputFileType := "yaml"
 	outputFileName := "out"
 	directory := "data"
+	startTime := "2022-01-01T07:20:00+07:00"
+	endTime := "2022-01-02T00:00:00+07:00"
 
 	// read the data directory
 	files, err := os.ReadDir(directory)
@@ -98,10 +100,24 @@ func main() {
 			log.Fatal(err)
 		}
 
+		startTime, err := time.Parse(time.RFC3339, startTime)
+		if err != nil {
+			log.Fatal(err)
+		}
+		endTime, err := time.Parse(time.RFC3339, endTime)
+		if err != nil {
+			log.Fatal(err)
+		}
+		startTimeInUTC := startTime.UTC()
+		endTimeInUTC := endTime.UTC()
+
 		// iterate through every metric data and
 		// add those value into 'result' map
-		for i := 0; i < len(metrics); i++ {
-			result[metrics[i].LevelName] += metrics[i].Value
+		for _, metric := range metrics {
+			if metric.Timestamp.Before(startTimeInUTC) || metric.Timestamp.Equal(endTimeInUTC) || metric.Timestamp.After(endTimeInUTC) {
+				continue
+			}
+			result[metric.LevelName] += metric.Value
 		}
 	}
 
