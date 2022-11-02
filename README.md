@@ -19,6 +19,11 @@ If you already build the app, just run executable (.exe) file using following co
 ```
 <small>Note: inputDirPath, inputFileType, inputStartTime, inputEndTime are required value</small>
 
+Example command
+```powershell
+.\sumetife.exe -d data -t json --startTime 2022-01-01T07:00:20+07:00 --endTime 2022-01-02T00:00:00Z
+```
+
 #### Command line flag
 | Flag | Description | Type |
 | - | - | - |
