@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -131,26 +132,36 @@ func WriteMetricResultToJSONFile(result []MetricResult) error {
 }
 
 func main() {
-	// Open a metric file
-	// filename := "data/csv/01-jan.csv"
-	filename := "data/json/01-jan.json"
-	file, err := OpenMetricFile(filename)
-	// if os.Open returns an error then handle it
+	dirPath := "data/csv"
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// defer the closing of our file so that we can parse it later on
-	defer file.Close()
-
-	// metrics := GetMetricsDataFromCSVFile(file)
-	metrics := GetMetricsDataFromJSONFile(file)
-
-	// iterate through every metric file and
-	// summarize those value for each level name at the data
 	result := map[string]int{}
-	for i := 0; i < len(metrics); i++ {
-		result[metrics[i].LevelName] += metrics[i].Value
+	// iterate through every metric file and summarize those value of each level name
+	for _, file := range files {
+		// fmt.Println(filepath.Join(dirPath, file.Name()), file.IsDir())
+
+		// Open a metric file
+		filename := filepath.Join(dirPath, file.Name())
+		file, err := OpenMetricFile(filename)
+		// if os.Open returns an error then handle it
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// defer the closing of our file so that we can parse it later on
+		defer file.Close()
+
+		metrics := GetMetricsDataFromCSVFile(file)
+		// metrics := GetMetricsDataFromJSONFile(file)
+
+		// iterate through every metric data and
+		// add those value into 'result' map
+		for i := 0; i < len(metrics); i++ {
+			result[metrics[i].LevelName] += metrics[i].Value
+		}
 	}
 
 	// white the file content which contains our result into a json file
