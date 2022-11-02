@@ -19,8 +19,8 @@ type MetricEncoder func(v any) ([]byte, error)
 type MetricHandler interface {
 	// GetMetricsDataFromFile return array of mapped metric data
 	GetMetricsDataFromFile(fileName string) ([]Metric, error)
-	// WriteMetricResultToFile generate a file which consist metric result
-	WriteMetricResultToFile(fileName string, result map[string]int) error
+	// WriteMetricResultToFile generate a file which consist all metric result
+	WriteMetricResultToFile(fileName string, metricResult []MetricResult) error
 }
 
 type metricHandler struct {
@@ -50,9 +50,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 	return metrics, nil
 }
 
-func (h metricHandler) WriteMetricResultToFile(fileName string, result map[string]int) error {
-	metricResult := MetricResultFormatter(result)
-
+func (h metricHandler) WriteMetricResultToFile(fileName string, metricResult []MetricResult) error {
 	// print result to the console
 	for _, v := range metricResult {
 		fmt.Printf("Level name: %s, total value: %d\n", v.LevelName, v.TotalValue)

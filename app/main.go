@@ -156,8 +156,8 @@ func main() {
 		encoder = yaml.Marshal
 	}
 
-	// initialize file handler
-	fileHandler := metric.NewMetricHandler(fileDecoder, encoder)
+	// initialize handler
+	handler := metric.NewMetricHandler(fileDecoder, encoder)
 
 	// define final result
 	result := map[string]int{}
@@ -170,7 +170,7 @@ func main() {
 		}
 
 		fileName := filepath.Join(inputDirPath, file.Name())
-		metrics, err := fileHandler.GetMetricsDataFromFile(fileName)
+		metrics, err := handler.GetMetricsDataFromFile(fileName)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -188,15 +188,20 @@ func main() {
 		// add those value into 'result' map
 		for _, metric := range metrics {
 			// restrict metric data which timestamp is not in the range time
-			if metric.Timestamp.Before(startTime) || metric.Timestamp.Equal(endTime) || metric.Timestamp.After(endTime) {
+			if !metric.IsInRange(startTime, endTime) {
 				continue
 			}
 			result[metric.LevelName] += metric.Value
 		}
 	}
 
+	metricResult := metric.MetricResultFormatter(result)
+
+	// generate final metric result
+	// metricResult := handler.GetMetricResultFromFiles(files)
+
 	// write the file content which contains our result into a file
-	if err := fileHandler.WriteMetricResultToFile(outputFileName+"."+outputFileType, result); err != nil {
+	if err := handler.WriteMetricResultToFile(outputFileName+"."+outputFileType, metricResult); err != nil {
 		log.Fatal(err)
 	}
 }

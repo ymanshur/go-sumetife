@@ -1,6 +1,6 @@
 package metric
 
-// MetricResultFormatter struct which contains
+// MetricResult struct which contains
 // total value of a game level
 type MetricResult struct {
 	LevelName  string `json:"level_name" yaml:"level_name"`

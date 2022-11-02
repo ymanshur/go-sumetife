@@ -8,7 +8,7 @@ import (
 
 func TestMetricResultFormatterSuccess(t *testing.T) {
 	// Setup
-	mockResult = map[string]int{
+	mockResult := map[string]int{
 		"lobby_screen": 161,
 		"level1":       126,
 	}

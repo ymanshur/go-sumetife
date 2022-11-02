@@ -9,3 +9,10 @@ type Metric struct {
 	Value     int       `json:"value"`
 	Timestamp time.Time `json:"timestamp"`
 }
+
+func (m Metric) IsInRange(start, end time.Time) bool {
+	if m.Timestamp.Before(start) || m.Timestamp.Equal(end) || m.Timestamp.After(end) {
+		return false
+	}
+	return true
+}

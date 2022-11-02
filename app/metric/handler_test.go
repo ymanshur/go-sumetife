@@ -12,7 +12,7 @@ import (
 )
 
 var mockFileName = "01-jan.json"
-var mockResult = map[string]int{}
+var mockMetricResult = []MetricResult{}
 
 func MockMetricFileDecoder(file *os.File, metrics *[]Metric) error {
 	metric := Metric{
@@ -99,7 +99,7 @@ func TestWriteMetricResultToFileSuccess(t *testing.T) {
 	fileHandler := NewMetricHandler(fileDecoder, encoder)
 
 	// Assertions
-	assert.NoError(t, fileHandler.WriteMetricResultToFile(mockFileName, mockResult))
+	assert.NoError(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
 
 func TestWriteMetricResultToFileErrorEncoder(t *testing.T) {
@@ -115,7 +115,7 @@ func TestWriteMetricResultToFileErrorEncoder(t *testing.T) {
 	fileHandler := NewMetricHandler(fileDecoder, encoder)
 
 	// Assertions
-	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockResult))
+	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
 
 func TestWriteMetricResultToFileErrorWriteFile(t *testing.T) {
@@ -130,5 +130,5 @@ func TestWriteMetricResultToFileErrorWriteFile(t *testing.T) {
 	fileHandler := NewMetricHandler(fileDecoder, encoder)
 
 	// Assertions
-	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockResult))
+	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
