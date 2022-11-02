@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var OpenFile = os.Open
+
 // MetricFileDecoder update the defined metrics
 // by each metric value in the file
 type MetricFileDecoder func(file *os.File, metrics *[]Metric) error
@@ -30,7 +32,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 	var metrics []Metric
 
 	// Open a metric file
-	file, err := os.Open(fileName)
+	file, err := OpenFile(fileName)
 	// if os.Open returns an error then handle it
 	if err != nil {
 		return metrics, err
