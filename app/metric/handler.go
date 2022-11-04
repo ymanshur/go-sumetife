@@ -2,7 +2,7 @@ package metric
 
 import (
 	"fmt"
-	"log"
+	_ "log"
 	"os"
 )
 
@@ -39,7 +39,7 @@ func (h *metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error
 	if err != nil {
 		return metrics, err
 	}
-	log.Println("Successfully opened", fileName)
+	// log.Println("Successfully opened", fileName)
 
 	// defer the closing of our file so that we can parse it later on
 	defer file.Close()
@@ -53,23 +53,21 @@ func (h *metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error
 }
 
 func (h *metricHandler) WriteMetricResultToFile(fileName string, metricResult []MetricResult) error {
-	// print result to the console
-	for _, v := range metricResult {
-		fmt.Printf("Level name: %s, total value: %d\n", v.LevelName, v.TotalValue)
-	}
-
 	// marshal (encode) the result to []byte with formatter function
 	fileContent, err := h.fileEncoder(metricResult)
 	if err != nil {
 		return err
 	}
 
+	// print result to the console
+	fmt.Println(string(fileContent))
+
 	// write the file content which contains our metric result into a file
 	if err := WriteFile(fileName, fileContent, 0644); err != nil {
 		return err
 	}
 
-	log.Println("Successfully generated " + fileName)
+	// log.Println("Successfully generated " + fileName)
 
 	return nil
 }
