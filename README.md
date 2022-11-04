@@ -47,10 +47,12 @@ make test mode=html
 ```
 
 ### Need improvement...
-0. avoid using `json` and `csv` package
-1. using concurrency
-2. avoid loop in loop (n2)
-3. apply integration test, need auto-generating huge data samples
-4. apply other appropriate design pattern: dependency injection, adaptor, etc.
-5. do benchmark test
-6. using context if needed
+1. avoid using `json` and `csv` package
+    1. declare adapter interface,
+    2. create unit test for adapter using testify mock
+2. using concurrency
+3. avoid loop in loop (n2)
+4. apply integration test, need auto-generating huge data samples
+5. apply other appropriate design pattern: dependency injection, adaptor, etc.
+6. do benchmark test
+7. using context if needed
