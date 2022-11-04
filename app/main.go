@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"log"
 	"os"
@@ -9,8 +8,6 @@ import (
 	"sumetife/adapter"
 	"sumetife/metric"
 	"sumetife/util"
-
-	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -101,14 +98,14 @@ func main() {
 		fileDecoder = adapter.CSVFileDecoder
 	}
 
-	// define encoder
-	encoder := json.Marshal
+	// define file encoder
+	fileEncoder := adapter.JSONFileEncoder
 	if outputFileType == "yaml" {
-		encoder = yaml.Marshal
+		fileEncoder = adapter.YAMLFileEncoder
 	}
 
 	// initialize handler
-	handler := metric.NewMetricHandler(fileDecoder, encoder)
+	handler := metric.NewMetricHandler(fileDecoder, fileEncoder)
 
 	// define final result
 	result := map[string]int{}
@@ -131,6 +128,7 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// define time range of metrics data, standardized using UTC-0
 		startTime, err := util.ParseToTimeUTC(inputStartTime)
 		if err != nil {
 			log.Fatal(err)
