@@ -62,7 +62,7 @@ func (h *metricHandler) WriteMetricResultToFile(fileName string, metricResult []
 		return err
 	}
 
-	// white the file content which contains our result into a file
+	// write the file content which contains our metric result into a file
 	if err := WriteFile(fileName, fileContent, 0644); err != nil {
 		return err
 	}
