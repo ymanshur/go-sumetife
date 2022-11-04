@@ -24,7 +24,7 @@ func JSONFileDecoder(file *os.File, metrics *[]metric.Metric) error {
 
 // JSONFileEncoder return the json file content ([]byte) of metric result
 func JSONFileEncoder(metricResult []metric.MetricResult) ([]byte, error) {
-	fileContent, err := json.Marshal(metricResult)
+	fileContent, err := json.MarshalIndent(metricResult, "", "\t")
 	if err != nil {
 		return nil, err
 	}
