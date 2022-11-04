@@ -1,5 +1,6 @@
 # Sumetife App
-AccetByte Inc technical project-based test
+
+The app summarizes the data in the metric files reported daily to help the game designers to decide which level should be updated. This project is intended as a AccetByte Inc technical project-based test submission
 
 ### Build the app
 Build the app using `make`, will return a (executable) file which name is sumetife.exe
@@ -7,7 +8,7 @@ Build the app using `make`, will return a (executable) file which name is sumeti
 make build
 ```
 
-### Running the app
+### Run the app
 Run `main.go` using `make`
 ```powershell
 make run
@@ -34,7 +35,7 @@ Example command
 | `--outputFileType` | The output type of the summary, supported value: json and yaml | Optional |
 | `--outputFileName` | The output filename of summary | Optional |
 
-### Testing the app
+### Test the app
 Complete (include function mode) run test
 ```powershell
 make test
@@ -44,3 +45,12 @@ Add `mode=html` argument for html display
 ```powershell
 make test mode=html
 ```
+
+### Need improvement...
+0. avoid using `json` and `csv` package
+1. using concurrency
+2. avoid loop in loop (n2)
+3. apply integration test, need auto-generating huge data samples
+4. apply other appropriate design pattern: dependency injection, adaptor, etc.
+5. do benchmark test
+6. using context if needed
