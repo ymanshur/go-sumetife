@@ -9,12 +9,13 @@ import (
 var OpenFile = os.Open
 var WriteFile = os.WriteFile
 
-// MetricFileDecoder update the defined metrics
-// by each metric value in the file
+// MetricFileDecoder decode the file and save it
+// to the defined metrics
 type MetricFileDecoder func(file *os.File, metrics *[]Metric) error
 
-// MetricEncoder unmarshal the (any) value
-type MetricEncoder func(v any) ([]byte, error)
+// MetricFileEncoder unmarshal (encode)
+// the metric result value to file content
+type MetricFileEncoder func(metricResult []MetricResult) ([]byte, error)
 
 type MetricHandler interface {
 	// GetMetricsDataFromFile return array of mapped metric data
@@ -24,7 +25,7 @@ type MetricHandler interface {
 }
 
 type metricHandler struct {
-	encoder     MetricEncoder
+	fileEncoder MetricFileEncoder
 	fileDecoder MetricFileDecoder
 }
 
@@ -32,17 +33,18 @@ func (h *metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error
 	// initialize our metrics array
 	var metrics []Metric
 
-	// Open a metric file
+	// open a metric file
 	file, err := OpenFile(fileName)
 	// if os.Open returns an error then handle it
 	if err != nil {
 		return metrics, err
 	}
-	// log.Println("Successfully opened", fileName)
+	log.Println("Successfully opened", fileName)
 
 	// defer the closing of our file so that we can parse it later on
 	defer file.Close()
 
+	// unmarshal (decoder) the file to metrics
 	if err := h.fileDecoder(file, &metrics); err != nil {
 		return nil, err
 	}
@@ -56,8 +58,8 @@ func (h *metricHandler) WriteMetricResultToFile(fileName string, metricResult []
 		fmt.Printf("Level name: %s, total value: %d\n", v.LevelName, v.TotalValue)
 	}
 
-	// marshal (encode) the result with formatter function
-	fileContent, err := h.encoder(metricResult)
+	// marshal (encode) the result to []byte with formatter function
+	fileContent, err := h.fileEncoder(metricResult)
 	if err != nil {
 		return err
 	}
@@ -72,9 +74,9 @@ func (h *metricHandler) WriteMetricResultToFile(fileName string, metricResult []
 	return nil
 }
 
-func NewMetricHandler(fileDecoder MetricFileDecoder, encoder MetricEncoder) MetricHandler {
+func NewMetricHandler(fileDecoder MetricFileDecoder, fileEncoder MetricFileEncoder) MetricHandler {
 	return &metricHandler{
 		fileDecoder: fileDecoder,
-		encoder:     encoder,
+		fileEncoder: fileEncoder,
 	}
 }

@@ -24,7 +24,7 @@ func MockMetricFileDecoder(file *os.File, metrics *[]Metric) error {
 	return nil
 }
 
-func MockMetricEncoder(v any) ([]byte, error) {
+func MockMetricFileEncoder(MetricResult []MetricResult) ([]byte, error) {
 	buf := []byte(nil)
 	return buf, nil
 }
@@ -43,9 +43,7 @@ func TestGetMetricsDataFromFile_Success(t *testing.T) {
 	OpenFile = MockOpenFile
 	defer func() { OpenFile = os.Open }()
 
-	fileDecoder := MockMetricFileDecoder
-	encoder := MockMetricEncoder
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(MockMetricFileDecoder, MockMetricFileEncoder)
 
 	metrics, err := fileHandler.GetMetricsDataFromFile(mockFileName)
 
@@ -62,9 +60,7 @@ func TestGetMetricsDataFromFile_ErrorOpenFile(t *testing.T) {
 	}
 	defer func() { OpenFile = os.Open }()
 
-	fileDecoder := MockMetricFileDecoder
-	encoder := MockMetricEncoder
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(MockMetricFileDecoder, MockMetricFileEncoder)
 
 	_, err := fileHandler.GetMetricsDataFromFile(mockFileName)
 
@@ -80,8 +76,7 @@ func TestGetMetricsDataFromFile_ErrorFileDecoder(t *testing.T) {
 	fileDecoder := func(file *os.File, metrics *[]Metric) error {
 		return csv.ErrTrailingComma
 	}
-	encoder := MockMetricEncoder
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(fileDecoder, MockMetricFileEncoder)
 
 	_, err := fileHandler.GetMetricsDataFromFile(mockFileName)
 
@@ -94,25 +89,22 @@ func TestWriteMetricResultToFile_Success(t *testing.T) {
 	WriteFile = MockWriteFile
 	defer func() { WriteFile = os.WriteFile }()
 
-	fileDecoder := MockMetricFileDecoder
-	encoder := MockMetricEncoder
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(MockMetricFileDecoder, MockMetricFileEncoder)
 
 	// Assertions
 	assert.NoError(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
 
-func TestWriteMetricResultToFile_ErrorEncoder(t *testing.T) {
+func TestWriteMetricResultToFile_ErrorFileEncoder(t *testing.T) {
 	// Setup
 	WriteFile = MockWriteFile
 	defer func() { WriteFile = os.WriteFile }()
 
-	fileDecoder := MockMetricFileDecoder
-	encoder := func(v any) ([]byte, error) {
+	fileEncoder := func(metricResult []MetricResult) ([]byte, error) {
 		buf := []byte(nil)
 		return buf, fmt.Errorf("json: unsupported type: func()")
 	}
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(MockMetricFileDecoder, fileEncoder)
 
 	// Assertions
 	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
@@ -125,9 +117,7 @@ func TestWriteMetricResultToFile_ErrorWriteFile(t *testing.T) {
 	}
 	defer func() { WriteFile = os.WriteFile }()
 
-	fileDecoder := MockMetricFileDecoder
-	encoder := MockMetricEncoder
-	fileHandler := NewMetricHandler(fileDecoder, encoder)
+	fileHandler := NewMetricHandler(MockMetricFileDecoder, MockMetricFileEncoder)
 
 	// Assertions
 	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
