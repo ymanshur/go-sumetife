@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMetricResultFormatterSuccess(t *testing.T) {
+func TestMetricResultFormatter_Success(t *testing.T) {
 	// Setup
 	mockResult := map[string]int{
 		"lobby_screen": 161,
