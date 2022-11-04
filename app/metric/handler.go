@@ -39,6 +39,7 @@ func (h *metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error
 	if err != nil {
 		return metrics, err
 	}
+
 	// log.Println("Successfully opened", fileName)
 
 	// defer the closing of our file so that we can parse it later on
