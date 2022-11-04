@@ -38,7 +38,7 @@ func MockWriteFile(name string, data []byte, perm fs.FileMode) error {
 	return nil
 }
 
-func TestGetMetricsDataFromFileSuccess(t *testing.T) {
+func TestGetMetricsDataFromFile_Success(t *testing.T) {
 	// Setup
 	OpenFile = MockOpenFile
 	defer func() { OpenFile = os.Open }()
@@ -55,7 +55,7 @@ func TestGetMetricsDataFromFileSuccess(t *testing.T) {
 	}
 }
 
-func TestGetMetricsDataFromFileErrorOpenFile(t *testing.T) {
+func TestGetMetricsDataFromFile_ErrorOpenFile(t *testing.T) {
 	// Setup
 	OpenFile = func(name string) (*os.File, error) {
 		return nil, fmt.Errorf("open %s: no such file or directory", mockFileName)
@@ -72,7 +72,7 @@ func TestGetMetricsDataFromFileErrorOpenFile(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetMetricsDataFromFileErrorFileDecoder(t *testing.T) {
+func TestGetMetricsDataFromFile_ErrorFileDecoder(t *testing.T) {
 	// Setup
 	OpenFile = MockOpenFile
 	defer func() { OpenFile = os.Open }()
@@ -89,7 +89,7 @@ func TestGetMetricsDataFromFileErrorFileDecoder(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestWriteMetricResultToFileSuccess(t *testing.T) {
+func TestWriteMetricResultToFile_Success(t *testing.T) {
 	// Setup
 	WriteFile = MockWriteFile
 	defer func() { WriteFile = os.WriteFile }()
@@ -102,7 +102,7 @@ func TestWriteMetricResultToFileSuccess(t *testing.T) {
 	assert.NoError(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
 
-func TestWriteMetricResultToFileErrorEncoder(t *testing.T) {
+func TestWriteMetricResultToFile_ErrorEncoder(t *testing.T) {
 	// Setup
 	WriteFile = MockWriteFile
 	defer func() { WriteFile = os.WriteFile }()
@@ -118,7 +118,7 @@ func TestWriteMetricResultToFileErrorEncoder(t *testing.T) {
 	assert.Error(t, fileHandler.WriteMetricResultToFile(mockFileName, mockMetricResult))
 }
 
-func TestWriteMetricResultToFileErrorWriteFile(t *testing.T) {
+func TestWriteMetricResultToFile_ErrorWriteFile(t *testing.T) {
 	// Setup
 	WriteFile = func(name string, data []byte, perm fs.FileMode) error {
 		return os.ErrInvalid
