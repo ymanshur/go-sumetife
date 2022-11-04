@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sumetife/adapter"
 	"sumetife/metric"
-	"sumetife/util"
+	"time"
 )
 
 func main() {
@@ -71,25 +71,35 @@ func main() {
 
 	// validate arguments
 	if inputDirPath == "" {
-		log.Fatal("argument error: '-d' or '--directory' flag-value is required")
+		panic("argument error: '-d' or '--directory' flag-value is required")
 	}
 	if inputFileType == "" {
-		log.Fatal("argument error: '-t' or '--type' flag-value is required")
+		panic("argument error: '-t' or '--type' flag-value is required")
 	}
 	if inputFileType != "json" && inputFileType != "csv" {
-		log.Fatal("argument error: only the json or csv file types were accepted as input files")
+		panic("argument error: only the json or csv file types were accepted as input files")
 	}
 	if inputStartTime == "" {
-		log.Fatal("argument error: '--startTime' flag-value is required")
+		panic("argument error: '--startTime' flag-value is required")
 	}
 	if inputEndTime == "" {
-		log.Fatal("argument error: '--endTime' flag-value is required")
+		panic("argument error: '--endTime' flag-value is required")
+	}
+
+	// define time range of metrics data
+	startTime, err := time.Parse(time.RFC3339, inputStartTime)
+	if err != nil {
+		panic(err)
+	}
+	endTime, err := time.Parse(time.RFC3339, inputEndTime)
+	if err != nil {
+		panic(err)
 	}
 
 	// read the data directory
 	dirEntries, err := os.ReadDir(inputDirPath)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	// define file decoder
@@ -125,17 +135,8 @@ func main() {
 		fileName := filepath.Join(inputDirPath, entry.Name())
 		metrics, err := handler.GetMetricsDataFromFile(fileName)
 		if err != nil {
-			log.Fatal(err)
-		}
-
-		// define time range of metrics data, standardized using UTC-0
-		startTime, err := util.ParseToTimeUTC(inputStartTime)
-		if err != nil {
-			log.Fatal(err)
-		}
-		endTime, err := util.ParseToTimeUTC(inputEndTime)
-		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			continue
 		}
 
 		// iterate through every metric data and
@@ -154,6 +155,6 @@ func main() {
 
 	// write the file content which contains our result into a file
 	if err := handler.WriteMetricResultToFile(outputFileName+"."+outputFileType, metricResult); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
