@@ -1,70 +1,20 @@
 package main
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"flag"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
+	"sumetife/adapter"
 	"sumetife/metric"
 	"sumetife/util"
-	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
-// JSONFileDecoder updates defined metrics data from a json file
-func JSONFileDecoder(file *os.File, metrics *[]metric.Metric) error {
-	// read our opened file as a byte array
-	byteValue, err := io.ReadAll(file)
-	if err != nil {
-		return err
-	}
-
-	// unmarshal (decode) our byteArray which contains our
-	// json file content into 'metrics' which we defined above
-	json.Unmarshal(byteValue, &metrics)
-
-	return nil
-}
-
-// CSVFileDecoder updates defined metrics data from a csv file
-func CSVFileDecoder(file *os.File, metrics *[]metric.Metric) error {
-	// read our opened file as a string matrix (array or array)
-	csvReader := csv.NewReader(file)
-	csvLines, err := csvReader.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	// map our csvLines which contains our
-	// csv file content into 'metrics' which we defined above
-	for _, line := range csvLines[1:] {
-		matricValue, err := strconv.Atoi(line[2])
-		if err != nil {
-			return err
-		}
-
-		matricTimestamp, err := time.Parse(time.RFC3339, line[0])
-		if err != nil {
-			return err
-		}
-
-		metric := metric.Metric{
-			LevelName: line[1],
-			Value:     matricValue,
-			Timestamp: matricTimestamp,
-		}
-		*metrics = append(*metrics, metric)
-	}
-
-	return nil
-}
-
 func main() {
+	// define arguments variables
 	var inputDirPath string
 	var inputFileType string
 	var inputStartTime string
@@ -122,6 +72,7 @@ func main() {
 	)
 	flag.Parse()
 
+	// validate arguments
 	if inputDirPath == "" {
 		log.Fatal("argument error: '-d' or '--directory' flag-value is required")
 	}
@@ -139,15 +90,15 @@ func main() {
 	}
 
 	// read the data directory
-	files, err := os.ReadDir(inputDirPath)
+	dirEntries, err := os.ReadDir(inputDirPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// define file decoder
-	fileDecoder := JSONFileDecoder
+	fileDecoder := adapter.JSONFileDecoder
 	if inputFileType == "csv" {
-		fileDecoder = CSVFileDecoder
+		fileDecoder = adapter.CSVFileDecoder
 	}
 
 	// define encoder
@@ -162,14 +113,19 @@ func main() {
 	// define final result
 	result := map[string]int{}
 	// iterate through every metric file and summarize those value of each level name
-	for _, file := range files {
+	for _, entry := range dirEntries {
+		// validate the entry, only pass the file
+		if entry.IsDir() {
+			continue
+		}
 		// validate related file type
-		fileExt := filepath.Ext(file.Name())
+		fileExt := filepath.Ext(entry.Name())
 		if fileExt != ("." + inputFileType) {
 			continue
 		}
 
-		fileName := filepath.Join(inputDirPath, file.Name())
+		// get metrics data
+		fileName := filepath.Join(inputDirPath, entry.Name())
 		metrics, err := handler.GetMetricsDataFromFile(fileName)
 		if err != nil {
 			log.Fatal(err)
@@ -185,7 +141,7 @@ func main() {
 		}
 
 		// iterate through every metric data and
-		// add those value into 'result' map
+		// sum those value into 'result' map
 		for _, metric := range metrics {
 			// restrict metric data which timestamp is not in the range time
 			if !metric.IsInRange(startTime, endTime) {
@@ -195,10 +151,8 @@ func main() {
 		}
 	}
 
+	// formatting the result map
 	metricResult := metric.MetricResultFormatter(result)
-
-	// generate final metric result
-	// metricResult := handler.GetMetricResultFromFiles(files)
 
 	// write the file content which contains our result into a file
 	if err := handler.WriteMetricResultToFile(outputFileName+"."+outputFileType, metricResult); err != nil {
