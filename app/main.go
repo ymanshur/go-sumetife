@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"log"
+	_ "log"
 	"os"
 	"path/filepath"
 	"sumetife/adapter"
@@ -135,7 +135,7 @@ func main() {
 		fileName := filepath.Join(inputDirPath, entry.Name())
 		metrics, err := handler.GetMetricsDataFromFile(fileName)
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 			continue
 		}
 
