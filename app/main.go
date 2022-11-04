@@ -2,11 +2,13 @@ package main
 
 import (
 	"flag"
+	"io/fs"
 	_ "log"
 	"os"
 	"path/filepath"
 	"sumetife/adapter"
 	"sumetife/metric"
+	"sync"
 	"time"
 )
 
@@ -119,6 +121,8 @@ func main() {
 
 	// define final result
 	result := map[string]int{}
+	resultMutex := sync.Mutex{}
+	waitEntries := sync.WaitGroup{}
 	// iterate through every metric file and summarize those value of each level name
 	for _, entry := range dirEntries {
 		// validate the entry, only pass the file
@@ -131,24 +135,36 @@ func main() {
 			continue
 		}
 
-		// get metrics data
-		fileName := filepath.Join(inputDirPath, entry.Name())
-		metrics, err := handler.GetMetricsDataFromFile(fileName)
-		if err != nil {
-			// log.Println(err)
-			continue
-		}
+		waitEntries.Add(1)
 
-		// iterate through every metric data and
-		// sum those value into 'result' map
-		for _, metric := range metrics {
-			// restrict metric data which timestamp is not in the range time
-			if !metric.IsInRange(startTime, endTime) {
-				continue
+		go func(e fs.DirEntry) {
+			// get metrics data
+			fileName := filepath.Join(inputDirPath, e.Name())
+			metrics, err := handler.GetMetricsDataFromFile(fileName)
+			if err != nil {
+				// log.Println(err)
+				waitEntries.Done()
 			}
-			result[metric.LevelName] += metric.Value
-		}
+
+			// iterate through every metric data and
+			// sum those value into 'result' map
+			resultMutex.Lock()
+			for _, metric := range metrics {
+				// restrict metric data which timestamp is not in the range time
+				if !metric.IsInRange(startTime, endTime) {
+					continue
+				}
+
+				result[metric.LevelName] += metric.Value
+
+			}
+			resultMutex.Unlock()
+
+			waitEntries.Done()
+		}(entry)
 	}
+
+	waitEntries.Wait()
 
 	// formatting the result map
 	metricResult := metric.MetricResultFormatter(result)
