@@ -28,7 +28,7 @@ type metricHandler struct {
 	fileDecoder MetricFileDecoder
 }
 
-func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error) {
+func (h *metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error) {
 	// initialize our metrics array
 	var metrics []Metric
 
@@ -50,7 +50,7 @@ func (h metricHandler) GetMetricsDataFromFile(fileName string) ([]Metric, error)
 	return metrics, nil
 }
 
-func (h metricHandler) WriteMetricResultToFile(fileName string, metricResult []MetricResult) error {
+func (h *metricHandler) WriteMetricResultToFile(fileName string, metricResult []MetricResult) error {
 	// print result to the console
 	for _, v := range metricResult {
 		fmt.Printf("Level name: %s, total value: %d\n", v.LevelName, v.TotalValue)
