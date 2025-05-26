@@ -1,6 +1,8 @@
 # Sumetife App
 
-The app summarizes the data in the metric files reported daily to help the game designers to decide which level should be updated. This project is intended as a AccetByte Inc technical project-based test submission
+The app summarizes the data in the metric files reported daily to help the game designers to decide which level should be updated. 
+
+This project is intended as a AccetByte Inc technical project-based test submission
 
 ### Build the app
 Build the app using `make`, will return a (executable) file which name is sumetife.exe
